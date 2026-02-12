@@ -39,6 +39,13 @@ class InvadersGame(arcade.Window):
         # Explosion textures (loaded once)
         self.explosion_textures: list[arcade.Texture]
 
+        # Sound effects
+        self.laser_sound: arcade.Sound
+        self.explosion_sound: arcade.Sound
+        self.hit_sound: arcade.Sound
+        self.gameover_sound: arcade.Sound
+        self.victory_sound: arcade.Sound
+
         # Game state
         self.score: int = 0
         self.game_over: bool = False
@@ -57,6 +64,14 @@ class InvadersGame(arcade.Window):
         # Load explosion textures (only once)
         if not hasattr(self, "explosion_textures") or not self.explosion_textures:
             self.explosion_textures = load_explosion_textures()
+
+        # Load sound effects (only once)
+        if not hasattr(self, "laser_sound") or not self.laser_sound:
+            self.laser_sound = arcade.load_sound(":resources:/sounds/laser1.wav")
+            self.explosion_sound = arcade.load_sound(":resources:/sounds/explosion2.wav")
+            self.hit_sound = arcade.load_sound(":resources:/sounds/hit1.wav")
+            self.gameover_sound = arcade.load_sound(":resources:/sounds/gameover1.wav")
+            self.victory_sound = arcade.load_sound(":resources:/sounds/upgrade1.wav")
 
         # Create player at bottom center of screen
         self.player = Player()
@@ -182,6 +197,8 @@ class InvadersGame(arcade.Window):
                 is_player_bullet=True,
             )
             self.player_bullets.append(bullet)
+            # Play laser sound
+            arcade.play_sound(self.laser_sound)
 
     def _check_collisions(self) -> None:
         """Check and handle all sprite collisions."""
@@ -201,6 +218,9 @@ class InvadersGame(arcade.Window):
                     )
                     self.explosions_list.append(explosion)
 
+                    # Play explosion sound
+                    arcade.play_sound(self.explosion_sound)
+
                     # Remove bullet and alien
                     bullet.remove_from_sprite_lists()
                     alien.remove_from_sprite_lists()
@@ -214,8 +234,11 @@ class InvadersGame(arcade.Window):
                 if arcade.check_for_collision(bullet, self.player):
                     bullet.remove_from_sprite_lists()
                     self.player.hit()
+                    # Play hit sound
+                    arcade.play_sound(self.hit_sound)
                     if not self.player.is_alive():
                         self.game_over = True
+                        arcade.play_sound(self.gameover_sound)
 
         # Aliens colliding with player
         if arcade.check_for_collision_with_list(
@@ -223,16 +246,19 @@ class InvadersGame(arcade.Window):
             self.alien_formation.aliens,
         ):
             self.game_over = True
+            arcade.play_sound(self.gameover_sound)
 
     def _check_game_state(self) -> None:
         """Check for win/lose conditions."""
         # Win: all aliens destroyed
         if self.alien_formation.is_empty():
             self.game_won = True
+            arcade.play_sound(self.victory_sound)
 
         # Lose: aliens reached the bottom
         if self.alien_formation.reached_bottom(y_threshold=80):
             self.game_over = True
+            arcade.play_sound(self.gameover_sound)
 
     def _draw_ui(self) -> None:
         """Draw score and lives display."""
