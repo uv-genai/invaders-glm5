@@ -7,6 +7,15 @@ import arcade
 from invaders.bullet import Bullet
 from invaders.settings import SETTINGS
 
+# Default sprite paths for different alien types
+ALIEN_SPRITES = [
+    ":resources:/images/enemies/slimePurple.png",
+    ":resources:/images/enemies/slimeBlue.png",
+    ":resources:/images/enemies/slimeGreen.png",
+    ":resources:/images/enemies/wormGreen.png",
+    ":resources:/images/enemies/wormPink.png",
+]
+
 
 class Alien(arcade.Sprite):
     """
@@ -32,16 +41,11 @@ class Alien(arcade.Sprite):
             image_path: Optional path to alien sprite image.
         """
         if image_path:
-            super().__init__(image_path, scale=0.5)
+            sprite_path = image_path
         else:
-            colors = [arcade.color.PURPLE, arcade.color.BLUE, arcade.color.CYAN]
-            color = colors[alien_type % len(colors)]
-            texture = arcade.make_soft_square_texture(
-                size=30,
-                color=color,
-                outer_alpha=255,
-            )
-            super().__init__(texture, scale=1.0)
+            sprite_path = ALIEN_SPRITES[alien_type % len(ALIEN_SPRITES)]
+
+        super().__init__(sprite_path, scale=0.4)
 
         self.center_x = x
         self.center_y = y

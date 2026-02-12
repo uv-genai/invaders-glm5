@@ -4,6 +4,7 @@ import arcade
 
 from invaders.alien import AlienFormation
 from invaders.bullet import Bullet
+from invaders.explosion import Explosion, load_explosion_textures
 from invaders.player import Player
 from invaders.settings import SETTINGS
 
@@ -33,6 +34,10 @@ class InvadersGame(arcade.Window):
         self.player_list: arcade.SpriteList[arcade.Sprite]
         self.alien_formation: AlienFormation
         self.player_bullets: arcade.SpriteList[arcade.Sprite]
+        self.explosions_list: arcade.SpriteList[arcade.Sprite]
+
+        # Explosion textures (loaded once)
+        self.explosion_textures: list[arcade.Texture]
 
         # Game state
         self.score: int = 0
@@ -49,6 +54,10 @@ class InvadersGame(arcade.Window):
         Initializes or resets all game objects and state. Call this
         to start a new game or restart after game over.
         """
+        # Load explosion textures (only once)
+        if not hasattr(self, "explosion_textures") or not self.explosion_textures:
+            self.explosion_textures = load_explosion_textures()
+
         # Create player at bottom center of screen
         self.player = Player()
         self.player.center_x = SETTINGS.screen_width / 2
@@ -65,6 +74,9 @@ class InvadersGame(arcade.Window):
         # Create player bullet list
         self.player_bullets = arcade.SpriteList()
 
+        # Create explosions list
+        self.explosions_list = arcade.SpriteList()
+
         # Reset game state
         self.score = 0
         self.game_over = False
@@ -79,6 +91,7 @@ class InvadersGame(arcade.Window):
         self.alien_formation.aliens.draw()
         self.alien_formation.bullets.draw()
         self.player_bullets.draw()
+        self.explosions_list.draw()
 
         # Draw UI
         self._draw_ui()
@@ -108,6 +121,9 @@ class InvadersGame(arcade.Window):
 
         # Update player bullets
         self.player_bullets.update(delta_time)
+
+        # Update explosions
+        self.explosions_list.update(delta_time)
 
         # Remove off-screen player bullets
         for bullet in list(self.player_bullets):
@@ -177,6 +193,14 @@ class InvadersGame(arcade.Window):
                     self.alien_formation.aliens,
                 )
                 for alien in hit_aliens:
+                    # Create explosion at alien position
+                    explosion = Explosion(
+                        self.explosion_textures,
+                        x=alien.center_x,
+                        y=alien.center_y,
+                    )
+                    self.explosions_list.append(explosion)
+
                     # Remove bullet and alien
                     bullet.remove_from_sprite_lists()
                     alien.remove_from_sprite_lists()
@@ -261,24 +285,24 @@ class InvadersGame(arcade.Window):
         """Draw victory screen."""
         arcade.draw_text(
             text="YOU WIN!",
-            start_x=SETTINGS.screen_width / 2,
-            start_y=SETTINGS.screen_height / 2 + 30,
+            x=SETTINGS.screen_width / 2,
+            y=SETTINGS.screen_height / 2 + 30,
             color=arcade.color.GREEN,
             font_size=40,
             anchor_x="center",
         )
         arcade.draw_text(
             text=f"Final Score: {self.score}",
-            start_x=SETTINGS.screen_width / 2,
-            start_y=SETTINGS.screen_height / 2 - 10,
+            x=SETTINGS.screen_width / 2,
+            y=SETTINGS.screen_height / 2 - 10,
             color=arcade.color.WHITE,
             font_size=20,
             anchor_x="center",
         )
         arcade.draw_text(
             text="Press R to Play Again",
-            start_x=SETTINGS.screen_width / 2,
-            start_y=SETTINGS.screen_height / 2 - 40,
+            x=SETTINGS.screen_width / 2,
+            y=SETTINGS.screen_height / 2 - 40,
             color=arcade.color.YELLOW,
             font_size=16,
             anchor_x="center",

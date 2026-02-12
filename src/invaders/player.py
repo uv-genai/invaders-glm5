@@ -4,6 +4,9 @@ import arcade
 
 from invaders.settings import SETTINGS
 
+# Default sprite path for the player ship
+DEFAULT_PLAYER_SPRITE = ":resources:/images/space_shooter/playerShip1_orange.png"
+
 
 class Player(arcade.Sprite):
     """
@@ -17,18 +20,10 @@ class Player(arcade.Sprite):
         Initialize the player sprite.
 
         Args:
-            image_path: Optional path to player sprite image. Uses default if None.
+            image_path: Optional path to player sprite image. Uses default Arcade sprite if None.
         """
-        if image_path:
-            super().__init__(image_path, scale=0.5)
-        else:
-            # Create a solid color texture and use it for the sprite
-            texture = arcade.make_soft_square_texture(
-                size=40,
-                color=arcade.color.GREEN,
-                outer_alpha=255,
-            )
-            super().__init__(texture, scale=1.0)
+        sprite_path = image_path or DEFAULT_PLAYER_SPRITE
+        super().__init__(sprite_path, scale=0.5)
 
         self.lives: int = SETTINGS.player_lives
         self.change_x: float = 0.0

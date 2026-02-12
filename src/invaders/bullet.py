@@ -2,6 +2,10 @@
 
 import arcade
 
+# Default sprite paths for bullets
+PLAYER_BULLET_SPRITE = ":resources:/images/space_shooter/laserBlue01.png"
+ALIEN_BULLET_SPRITE = ":resources:/images/space_shooter/laserRed01.png"
+
 
 class Bullet(arcade.Sprite):
     """
@@ -29,20 +33,19 @@ class Bullet(arcade.Sprite):
             image_path: Optional path to bullet sprite image.
         """
         if image_path:
-            super().__init__(image_path, scale=0.5)
+            sprite_path = image_path
         else:
-            color = arcade.color.YELLOW if is_player_bullet else arcade.color.RED
-            texture = arcade.make_soft_square_texture(
-                size=8,
-                color=color,
-                outer_alpha=255,
-            )
-            super().__init__(texture, scale=1.0)
+            sprite_path = PLAYER_BULLET_SPRITE if is_player_bullet else ALIEN_BULLET_SPRITE
+
+        super().__init__(sprite_path, scale=0.5)
 
         self.center_x = x
         self.center_y = y
         self.change_y = speed if is_player_bullet else -speed
         self.is_player_bullet = is_player_bullet
+
+        # Rotate laser to point upward for player, downward for alien
+        self.angle = 0 if is_player_bullet else 180
 
     def update(self, delta_time: float = 1 / 60) -> None:
         """
