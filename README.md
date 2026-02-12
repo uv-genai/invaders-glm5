@@ -2,7 +2,7 @@
 
 A Space Invaders clone built with Python and the Arcade library.
 
-![Space Invaders Screenshot](https://via.placeholder.com/800x600/000000/FFFFFF?text=Invaders+-+Space+Invaders+Clone)
+![Invaders Screenshot](screenshot.png)
 
 ## Features
 
