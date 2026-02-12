@@ -4,6 +4,13 @@ A Space Invaders clone built with Python and the Arcade library.
 
 ![Invaders Screenshot](screenshot.png)
 
+## AI
+
+Generated 100% with GLM-5 and Droid:
+- 112592 tokens
+- 245 requests
+- nano-gpt $8 subscription (60k requests/month, max context length)
+
 ## Features
 
 - Classic Space Invaders gameplay

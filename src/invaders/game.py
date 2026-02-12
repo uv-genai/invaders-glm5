@@ -1,12 +1,14 @@
 """Main game class managing the Space Invaders game."""
 
 import arcade
+from arcade.types import LRBT
 
 from invaders.alien import AlienFormation
 from invaders.bullet import Bullet
 from invaders.explosion import Explosion, load_explosion_textures
 from invaders.player import Player
 from invaders.settings import SETTINGS
+from invaders.star import StarField
 
 
 class InvadersGame(arcade.Window):
@@ -27,6 +29,16 @@ class InvadersGame(arcade.Window):
             width=SETTINGS.screen_width,
             height=SETTINGS.screen_height,
             title=SETTINGS.screen_title,
+            resizable=True,
+        )
+
+        # Camera for scaling in fullscreen - uses fixed projection to maintain game coordinates
+        self.camera = arcade.Camera2D(
+            position=(0, 0),
+            projection=LRBT(
+                left=0, right=SETTINGS.screen_width, bottom=0, top=SETTINGS.screen_height
+            ),
+            viewport=self.rect,
         )
 
         # Game objects
@@ -35,6 +47,9 @@ class InvadersGame(arcade.Window):
         self.alien_formation: AlienFormation
         self.player_bullets: arcade.SpriteList[arcade.Sprite]
         self.explosions_list: arcade.SpriteList[arcade.Sprite]
+
+        # Background
+        self.starfield: StarField
 
         # Explosion textures (loaded once)
         self.explosion_textures: list[arcade.Texture]
@@ -64,6 +79,10 @@ class InvadersGame(arcade.Window):
         # Load explosion textures (only once)
         if not hasattr(self, "explosion_textures") or not self.explosion_textures:
             self.explosion_textures = load_explosion_textures()
+
+        # Create starfield background (only once)
+        if not hasattr(self, "starfield") or not self.starfield:
+            self.starfield = StarField()
 
         # Load sound effects (only once)
         if not hasattr(self, "laser_sound") or not self.laser_sound:
@@ -101,6 +120,12 @@ class InvadersGame(arcade.Window):
         """Render the game screen."""
         self.clear()
 
+        # Use camera for proper scaling
+        self.camera.use()
+
+        # Draw starfield background first
+        self.starfield.draw()
+
         # Draw game objects
         self.player_list.draw()
         self.alien_formation.aliens.draw()
@@ -117,6 +142,18 @@ class InvadersGame(arcade.Window):
         elif self.game_won:
             self._draw_victory()
 
+    def on_resize(self, width: int, height: int) -> None:
+        """
+        Handle window resize events.
+
+        Args:
+            width: New window width.
+            height: New window height.
+        """
+        super().on_resize(width, height)
+        # Update camera viewport to match window, keep projection fixed to game coordinates
+        self.camera.viewport = self.rect
+
     def on_update(self, delta_time: float) -> None:
         """
         Update game logic.
@@ -124,6 +161,9 @@ class InvadersGame(arcade.Window):
         Args:
             delta_time: Time elapsed since last update in seconds.
         """
+        # Always update starfield background
+        self.starfield.update(delta_time)
+
         if self.game_over or self.game_won:
             return
 
@@ -162,6 +202,8 @@ class InvadersGame(arcade.Window):
         if self.game_over or self.game_won:
             if key == arcade.key.R:
                 self.setup()
+            elif key == arcade.key.F:
+                self._toggle_fullscreen()
             return
 
         match key:
@@ -205,6 +247,8 @@ class InvadersGame(arcade.Window):
     def _toggle_fullscreen(self) -> None:
         """Toggle between fullscreen and windowed mode."""
         self.set_fullscreen(not self.fullscreen)
+        # Update camera viewport to match new window size, projection stays fixed
+        self.camera.viewport = self.rect
 
     def _check_collisions(self) -> None:
         """Check and handle all sprite collisions."""
