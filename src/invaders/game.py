@@ -171,6 +171,8 @@ class InvadersGame(arcade.Window):
                 self.player.move_right()
             case arcade.key.SPACE:
                 self._fire_player_bullet()
+            case arcade.key.F:
+                self._toggle_fullscreen()
 
     def on_key_release(self, key: int, modifiers: int) -> None:
         """
@@ -199,6 +201,10 @@ class InvadersGame(arcade.Window):
             self.player_bullets.append(bullet)
             # Play laser sound
             arcade.play_sound(self.laser_sound)
+
+    def _toggle_fullscreen(self) -> None:
+        """Toggle between fullscreen and windowed mode."""
+        self.set_fullscreen(not self.fullscreen)
 
     def _check_collisions(self) -> None:
         """Check and handle all sprite collisions."""
